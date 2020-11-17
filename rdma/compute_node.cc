@@ -2,18 +2,12 @@
 #include "rdma.h"
 #include "../test/test_suite.h"
 
-/*
- * GetEmptyBTree() - Returns an empty Btree multimap object created on the heap
- */ 
-BTreeType *GetEmptyBTree() {
-  BTreeType *t = new BTreeType{KeyComparator{1}};
-  
-  return t; 
-}
+using BTreeType = btree<long, long>;
 
 void client_thread(RDMA_Manager* rdma_manager){
 
-  BTreeType *root = GetEmptyBTree();
+  BTreeType *t = new BTreeType;
+  t->insert(2,2);
   int key_num = 30 * 1024 * 1024;
   printf("Using key size = %d (%f million)\n",
            key_num,
@@ -26,7 +20,7 @@ void client_thread(RDMA_Manager* rdma_manager){
 
   long int start_key = key_num / 40 * (long)1;
 
-  root->insert(start_key, start_key);
+  t->insert(start_key, start_key);
 
   rdma_manager->Remote_Memory_Register(100*1024*1024);
   rdma_manager->Remote_Query_Pair_Connection(thread_id);
@@ -36,7 +30,15 @@ void client_thread(RDMA_Manager* rdma_manager){
   mem_pool_table[0] = *(rdma_manager->local_mem_pool[0]);
   mem_pool_table[1] = *(rdma_manager->local_mem_pool[0]);
   mem_pool_table[1].addr = (void*)((char*)mem_pool_table[1].addr + sizeof(root));// PROBLEM Could be here.
-
+  ibv_mr* new_mr_pointer;
+  ibv_mr* new_map_pointer;
+  rdma_manager->Allocate_Local_RDMA_Slot(new_mr_pointer,new_map_pointer);
+  //use new_mr_pointer->addr to copy your data to the new allocated memory chunk.
+  // If you don't use it anymore, you can call :
+  rdma_manager->Deallocate_Local_RDMA_Slot(new_mr_pointer,new_map_pointer);
+  SST_Metadata* Meta_data;
+  rdma_manager->Allocate_Remote_RDMA_Slot("ddd",Meta_data);
+  rdma_manager->Deallocate_Remote_RDMA_Slot(Meta_data);
   // char *msg = static_cast<char *>(rdma_manager->local_mem_pool[0]->addr);
   // strcpy(msg, "message from computing node");
   int msg_size = sizeof(root);
