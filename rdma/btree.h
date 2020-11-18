@@ -6,7 +6,8 @@ using namespace std;
 
 //number of pointers or number of child blocks [numberOfPointers = numberOfNodes + 1]
 int numberOfPointers;
-
+//TODO:  Now the block only contain value, you need to modify the BLock structure to hold key and value. I think you need to
+//TODO: modify the BLock, or create two types of block.
 struct Block{
     //number of nodes
     int tNodes;
@@ -16,6 +17,7 @@ struct Block{
     int value[MAX];
     //child Blocks
     Block *childBlock[MAX];
+    //For an index i childBlock i will contain all the value larger than value[i-1] but smaller than value[i]
     Block(){ //constructor to initialize a block
         tNodes = 0;
         parentBlock = NULL;
@@ -238,15 +240,18 @@ void splitNonLeaf(Block *curBlock){
 }
 
 void insertNode(Block *curBlock, int val){
+    //THis function contain the tranverse of the tree
 
     for(int i=0; i<=curBlock->tNodes; i++){
         if(val < curBlock->value[i] && curBlock->childBlock[i]!=NULL){
+            //This mean the block is an inner node
             insertNode(curBlock->childBlock[i], val);
             if(curBlock->tNodes==numberOfPointers)
                 splitNonLeaf(curBlock);
             return;
         }
         else if(val < curBlock->value[i] && curBlock->childBlock[i]==NULL){
+
             swap(curBlock->value[i], val);
             //swap(curBlock->childBlock[i], newChildBlock);
             if(i==curBlock->tNodes){
@@ -367,7 +372,7 @@ void mergeBlock(Block *leftBlock, Block *rightBlock, bool isLeaf, int posOfRight
      for(int i=0;leftBlock->childBlock[i]!=NULL;i++){
         leftBlock->childBlock[i]->parentBlock = leftBlock;
     }
-
+    //TODO: Memory leak?
 
 
 }

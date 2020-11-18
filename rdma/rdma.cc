@@ -1455,7 +1455,7 @@ void RDMA_Manager::Allocate_Remote_RDMA_Slot(const std::string &file_name,
   sst_meta->mr->addr = static_cast<void*>(static_cast<char*>(sst_meta->mr->addr) + sst_index*Table_Size);
   sst_meta->mr->length = Table_Size;
   sst_meta->fname = file_name;
-  sst_meta->map_pointer = ptr->first;
+  sst_meta->map_pointer = mr_last;
   return;
 }
 // A function try to allocat
