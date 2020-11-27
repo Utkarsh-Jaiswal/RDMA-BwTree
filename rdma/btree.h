@@ -239,13 +239,13 @@ void splitNonLeaf(Block *curBlock){
 
 }
 
-void insertNode(Block *curBlock, int val){
+void insertNode(Block *curBlock, int val, RDMA_Manager* rdma_manager){
     //THis function contain the tranverse of the tree
 
     for(int i=0; i<=curBlock->tNodes; i++){
         if(val < curBlock->value[i] && curBlock->childBlock[i]!=NULL){
             //This mean the block is an inner node
-            insertNode(curBlock->childBlock[i], val);
+            insertNode(curBlock->childBlock[i], val, rdma_manager);
             if(curBlock->tNodes==numberOfPointers)
                 splitNonLeaf(curBlock);
             return;

@@ -21,7 +21,7 @@ void client_thread(RDMA_Manager* rdma_manager){
     // file in the contend for that block.
 
     for (int i = 0; i<MAX; i++){
-        insertNode(rootBlock, i);
+        insertNode(rootBlock, i, rdma_manager);
     }
     // note: you need to modify the insertNode function to make
     // an RDMA data transfering every time you call this function. The insert node can help you iterate the tree
