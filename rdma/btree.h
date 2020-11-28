@@ -6,8 +6,7 @@ using namespace std;
 
 //number of pointers or number of child blocks [numberOfPointers = numberOfNodes + 1]
 int numberOfPointers;
-//TODO:  Now the block only contain value, you need to modify the BLock structure to hold key and value. I think you need to
-//TODO: modify the BLock, or create two types of block.
+
 struct Block{
     //number of nodes
     int tNodes;
@@ -31,7 +30,7 @@ struct Block{
 Block *rootBlock = new Block();
 
 //function to split the leaf nodes
-void splitLeaf(Block *curBlock){
+void splitLeaf(Block *curBlock, RDMA_Manager* rdma_manager){
     int x, i, j;
 
     //split the greater half to the left when numberOfPointer is odd
@@ -124,7 +123,7 @@ void splitLeaf(Block *curBlock){
 }
 
 //function to split the non leaf nodes
-void splitNonLeaf(Block *curBlock){
+void splitNonLeaf(Block *curBlock, RDMA_Manager* rdma_manager){
     int x, i, j;
 
     //split the less half to the left when numberOfPointer is odd
@@ -247,13 +246,12 @@ void insertNode(Block *curBlock, int val, RDMA_Manager* rdma_manager){
             //This mean the block is an inner node
             insertNode(curBlock->childBlock[i], val, rdma_manager);
             if(curBlock->tNodes==numberOfPointers)
-                splitNonLeaf(curBlock);
+                splitNonLeaf(curBlock, rdma_manager);
             return;
         }
         else if(val < curBlock->value[i] && curBlock->childBlock[i]==NULL){
 
             swap(curBlock->value[i], val);
-            //swap(curBlock->childBlock[i], newChildBlock);
             if(i==curBlock->tNodes){
                     curBlock->tNodes++;
                     break;
@@ -263,7 +261,7 @@ void insertNode(Block *curBlock, int val, RDMA_Manager* rdma_manager){
 
     if(curBlock->tNodes==numberOfPointers){
 
-            splitLeaf(curBlock);
+            splitLeaf(curBlock, rdma_manager);
     }
 }
 
