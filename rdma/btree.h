@@ -6,6 +6,7 @@ using namespace std;
 
 //number of pointers or number of child blocks [numberOfPointers = numberOfNodes + 1]
 int numberOfPointers;
+int msg_size = sizeof(Block);
 
 struct Block{
     //number of nodes
@@ -30,7 +31,7 @@ struct Block{
 Block *rootBlock = new Block();
 
 //function to split the leaf nodes
-void splitLeaf(Block *curBlock, RDMA_Manager* rdma_manager){
+void splitLeaf(Block *curBlock, RDMA_Manager* rdma_manager, std::string thread_id){
     int x, i, j;
 
     //split the greater half to the left when numberOfPointer is odd
@@ -123,7 +124,7 @@ void splitLeaf(Block *curBlock, RDMA_Manager* rdma_manager){
 }
 
 //function to split the non leaf nodes
-void splitNonLeaf(Block *curBlock, RDMA_Manager* rdma_manager){
+void splitNonLeaf(Block *curBlock, RDMA_Manager* rdma_manager, std::string thread_id){
     int x, i, j;
 
     //split the less half to the left when numberOfPointer is odd
@@ -238,15 +239,15 @@ void splitNonLeaf(Block *curBlock, RDMA_Manager* rdma_manager){
 
 }
 
-void insertNode(Block *curBlock, int val, RDMA_Manager* rdma_manager){
+void insertNode(Block *curBlock, int val, RDMA_Manager* rdma_manager, std::string thread_id){
     //THis function contain the tranverse of the tree
 
     for(int i=0; i<=curBlock->tNodes; i++){
         if(val < curBlock->value[i] && curBlock->childBlock[i]!=NULL){
             //This mean the block is an inner node
-            insertNode(curBlock->childBlock[i], val, rdma_manager);
+            insertNode(curBlock->childBlock[i], val, rdma_manager, thread_id);
             if(curBlock->tNodes==numberOfPointers)
-                splitNonLeaf(curBlock, rdma_manager);
+                splitNonLeaf(curBlock, rdma_manager, thread_id);
             return;
         }
         else if(val < curBlock->value[i] && curBlock->childBlock[i]==NULL){
@@ -261,7 +262,7 @@ void insertNode(Block *curBlock, int val, RDMA_Manager* rdma_manager){
 
     if(curBlock->tNodes==numberOfPointers){
 
-            splitLeaf(curBlock, rdma_manager);
+            splitLeaf(curBlock, rdma_manager, thread_id);
     }
 }
 

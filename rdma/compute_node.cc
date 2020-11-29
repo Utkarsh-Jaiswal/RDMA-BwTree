@@ -6,7 +6,6 @@ void client_thread(RDMA_Manager* rdma_manager){
     std::vector<Block*> Blocks;
 
     Block *rootBlock = new Block();
-    int msg_size = sizeof(Block);
     printf("Block Size is %d", msg_size);
 //
     auto myid = std::this_thread::get_id();
@@ -14,14 +13,11 @@ void client_thread(RDMA_Manager* rdma_manager){
     ss << myid;
     std::string thread_id = ss.str();
     rdma_manager->Remote_Memory_Register(100*rdma_manager->Block_Size);
-    ibv_mr* temp_mr_p;
-    char* temp_char_p;
-    rdma_manager->Local_Memory_Register(&temp_char_p, &temp_mr_p, 10*rdma_manager->Block_Size);
     rdma_manager->Remote_Query_Pair_Connection(thread_id);
     // file in the contend for that block.
 
     for (int i = 0; i<MAX; i++){
-        insertNode(rootBlock, i, rdma_manager);
+        insertNode(rootBlock, i, rdma_manager, thread_id);
     }
     // note: you need to modify the insertNode function to make
     // an RDMA data transfering every time you call this function. The insert node can help you iterate the tree
@@ -40,6 +36,10 @@ void client_thread(RDMA_Manager* rdma_manager){
     rdma_manager->Allocate_Remote_RDMA_Slot(dummyfile, target_sst);
     std::cout << target_sst->mr->rkey <<std::endl;
 
+    ibv_mr* temp_mr_p;
+    char* temp_char_p;
+    rdma_manager->Local_Memory_Register(&temp_char_p, &temp_mr_p, 10*rdma_manager->Block_Size);
+    
     // Memory copy the Root node to RDMA registered buffer
     memcpy(temp_mr_p->addr, rootBlock, sizeof(Block));
     // Write to the remote memory
