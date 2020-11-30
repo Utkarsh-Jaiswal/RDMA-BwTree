@@ -6,7 +6,6 @@ using namespace std;
 
 //number of pointers or number of child blocks [numberOfPointers = numberOfNodes + 1]
 int numberOfPointers;
-int msg_size = sizeof(Block);
 
 struct Block{
     //number of nodes
@@ -29,6 +28,7 @@ struct Block{
 };
 //declare root Block
 Block *rootBlock = new Block();
+int msg_size = sizeof(Block);
 
 //function to split the leaf nodes
 void splitLeaf(Block *curBlock, RDMA_Manager* rdma_manager, std::string thread_id){
