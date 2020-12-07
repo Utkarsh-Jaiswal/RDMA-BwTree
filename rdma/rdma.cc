@@ -1432,6 +1432,7 @@ void RDMA_Manager::Allocate_Remote_RDMA_Slot(const std::string &file_name,
     if (sst_index >= 0){
       *(sst_meta->mr) = *(ptr->first);
       sst_meta->mr->addr = static_cast<void*>(static_cast<char*>(sst_meta->mr->addr) + sst_index*Table_Size);
+      sst_meta->mr->length = Table_Size;
       sst_meta->fname = file_name;
       sst_meta->map_pointer = ptr->first; // it could be confused that the map_pointer is for the memtadata deletion
       // so that we can easily find where to deallocate our RDMA buffer. The key is a pointer to ibv_mr.
@@ -1452,8 +1453,9 @@ void RDMA_Manager::Allocate_Remote_RDMA_Slot(const std::string &file_name,
 //  sst_meta->mr = new ibv_mr();
   *(sst_meta->mr) = *(mr_last);
   sst_meta->mr->addr = static_cast<void*>(static_cast<char*>(sst_meta->mr->addr) + sst_index*Table_Size);
+  sst_meta->mr->length = Table_Size;
   sst_meta->fname = file_name;
-  sst_meta->map_pointer = ptr->first;
+  sst_meta->map_pointer = mr_last;
   return;
 }
 // A function try to allocat
@@ -1473,7 +1475,7 @@ void RDMA_Manager::Allocate_Local_RDMA_Slot(ibv_mr*& mr_input,
       map_pointer = ptr->first;
       *(mr_input) = *(ptr->first);
       mr_input->addr = static_cast<void*>(static_cast<char*>(mr_input->addr) + block_index*Block_Size);
-
+      mr_input->length = Block_Size;
       return;
     } else ptr++;
   }
@@ -1490,6 +1492,7 @@ void RDMA_Manager::Allocate_Local_RDMA_Slot(ibv_mr*& mr_input,
     map_pointer = mr_to_allocate;
     *(mr_input) = *(mr_to_allocate);
     mr_input->addr = static_cast<void*>(static_cast<char*>(mr_input->addr) + block_index*Block_Size);
+    mr_input->length = Block_Size;
 //  mr_input.fname = file_name;
     return;
   }
